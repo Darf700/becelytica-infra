@@ -1,0 +1,4 @@
+# Archivos sensibles y de sistema
+*.log
+*.json
+config.yml

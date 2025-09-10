@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Becelytica - Plataforma de Análisis Inteligente</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(59, 130, 246, 0.5);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0; }
+            50% { transform: translateY(-20px) translateX(10px); opacity: 1; }
+        }
+
+        /* Header */
+        .header {
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6, #1d4ed8);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.3)); }
+            to { filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.6)); }
+        }
+
+        /* Main content */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff, #e2e8f0, #94a3b8);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: slideDown 1s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            margin-bottom: 3rem;
+            color: #94a3b8;
+            max-width: 800px;
+            line-height: 1.6;
+            animation: slideUp 1s ease-out 0.3s both;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Service cards */
+        .services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            width: 100%;
+            animation: fadeIn 1s ease-out 0.6s both;
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .service-card:hover::before {
+            left: 100%;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.1);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .service-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .service-description {
+            color: #94a3b8;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .service-button {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.3s;
+        }
+
+        .service-button:hover::before {
+            left: 100%;
+        }
+
+        .service-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Footer */
+        .footer {
+            padding: 2rem;
+            text-align: center;
+            color: #64748b;
+            position: relative;
+            z-index: 10;
+        }
+
+        .footer-divider {
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+            margin: 1rem auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .services {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .service-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        /* Floating elements */
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            pointer-events: none;
+            animation: floatAround 8s ease-in-out infinite;
+        }
+
+        @keyframes floatAround {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(50px, -30px) rotate(90deg); }
+            50% { transform: translate(-30px, -60px) rotate(180deg); }
+            75% { transform: translate(-60px, 30px) rotate(270deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Animated background -->
+        <div class="particles" id="particles"></div>
+        
+        <!-- Floating decorative elements -->
+        <div class="floating-element" style="top: 10%; left: 10%; font-size: 2rem;">⚡</div>
+        <div class="floating-element" style="top: 20%; right: 15%; font-size: 1.5rem;">📊</div>
+        <div class="floating-element" style="bottom: 30%; left: 20%; font-size: 2.5rem;">🔍</div>
+        <div class="floating-element" style="bottom: 20%; right: 10%; font-size: 1.8rem;">💡</div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">Becelytica</div>
+        </header>
+
+        <!-- Main content -->
+        <main class="main">
+            <h1 class="hero-title">Bienvenido a Becelytica</h1>
+            <p class="hero-subtitle">
+                Plataforma inteligente de análisis y gestión empresarial. 
+                Descubre las herramientas que transformarán tu negocio.
+            </p>
+
+            <div class="services">
+                <div class="service-card" onclick="navigateToSuite()">
+                    <span class="service-icon">🏢</span>
+                    <h3 class="service-title">Business Suite</h3>
+                    <p class="service-description">
+                        Plataforma integral de gestión empresarial con herramientas 
+                        avanzadas para optimizar tus procesos de negocio.
+                    </p>
+                    <a href="https://suite.becelytica.com" class="service-button">
+                        Acceder a Suite →
+                    </a>
+                </div>
+
+                <div class="service-card" onclick="navigateToVeAI()">
+                    <span class="service-icon">🎬</span>
+                    <h3 class="service-title">veAIx Analyzer</h3>
+                    <p class="service-description">
+                        Analizador inteligente de videos con IA avanzada para 
+                        extraer insights valiosos de tu contenido audiovisual.
+                    </p>
+                    <a href="#" class="service-button" id="veaixButton">
+                        Acceder a veAIx →
+                    </a>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-divider"></div>
+            <p>&copy; 2025 Becelytica. Innovación en análisis inteligente.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Create animated particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Navigation functions
+        function navigateToSuite() {
+            window.open('https://suite.becelytica.com', '_blank');
+        }
+
+        function navigateToVeAI() {
+            // Reemplaza con la URL real de veAIx cuando esté disponible
+            alert('veAIx estará disponible próximamente. ¡Mantente atento!');
+        }
+
+        // Add smooth scroll and interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // Add hover effect to service cards
+            const serviceCards = document.querySelectorAll('.service-card');
+            serviceCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.background = 'rgba(59, 130, 246, 0.1)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.background = 'rgba(255, 255, 255, 0.05)';
+                });
+            });
+
+            // Update veAIx button if you have the URL
+            const veaixButton = document.getElementById('veaixButton');
+            // veaixButton.href = 'https://veaix.becelytica.com'; // Uncomment when ready
+        });
+
+        // Add subtle mouse move effect
+        document.addEventListener('mousemove', function(e) {
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+            
+            const particles = document.querySelectorAll('.particle');
+            particles.forEach((particle, index) => {
+                const speed = (index % 5 + 1) * 0.5;
+                const x = mouseX * speed;
+                const y = mouseY * speed;
+                particle.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        });
+    </script>
+</body>
+</html>
