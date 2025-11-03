@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Becelytica - Plataforma de Análisis Inteligente</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --tertiary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0a0a0f;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --text-primary: #ffffff;
+            --text-secondary: #a8b2d1;
+            --accent-purple: #667eea;
+            --accent-pink: #f5576c;
+            --accent-cyan: #00f2fe;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Advanced Canvas Background */
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        /* Noise Texture Overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Navigation Header */
+        .header {
+            padding: 2rem 4rem;
+            position: relative;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            background: rgba(10, 10, 15, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+            position: relative;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .logo-container:hover .logo::after {
+            transform: scaleX(1);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--tertiary-gradient);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Main Hero Section */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 2rem;
+            position: relative;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.2rem;
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent-purple);
+            margin-bottom: 2rem;
+            animation: fadeInDown 1s ease-out;
+            backdrop-filter: blur(10px);
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .hero-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(3rem, 10vw, 7rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero-title .gradient-text {
+            background: linear-gradient(135deg, #ffffff 0%, #667eea 50%, #00f2fe 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s ease-in-out infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            margin-bottom: 3rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            line-height: 1.7;
+            font-weight: 400;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Service Cards Grid */
+        .services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2.5rem;
+            max-width: 1400px;
+            width: 100%;
+            margin-top: 2rem;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .service-card {
+            position: relative;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 30px;
+            padding: 3rem;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: pointer;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Card Gradient Border Effect */
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 30px;
+            padding: 1px;
+            background: linear-gradient(135deg, transparent, rgba(102, 126, 234, 0.5), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .service-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Card Glow Effect */
+        .service-card::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, transparent 70%);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.6s ease;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .service-card:hover::after {
+            transform: translate(-50%, -50%) scale(1.5);
+        }
+
+        .service-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            border-color: rgba(102, 126, 234, 0.3);
+            box-shadow: 0 30px 60px rgba(102, 126, 234, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Card Content */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+            z-index: 2;
+        }
+
+        .service-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            font-size: 2.5rem;
+            transition: all 0.4s ease;
+        }
+
+        .service-card:hover .service-icon-wrapper {
+            transform: rotate(10deg) scale(1.1);
+            background: rgba(102, 126, 234, 0.2);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .card-badge {
+            padding: 0.4rem 1rem;
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .service-card:nth-child(2) .card-badge {
+            background: rgba(245, 87, 108, 0.1);
+            border-color: rgba(245, 87, 108, 0.3);
+            color: var(--accent-pink);
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .service-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .service-description {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        /* Features List */
+        .service-features {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        /* Card Footer */
+        .card-footer {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .service-button {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .service-card:nth-child(2) .service-button {
+            background: var(--secondary-gradient);
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.3);
+        }
+
+        .service-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .service-button:hover::before {
+            left: 100%;
+        }
+
+        .service-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        .service-card:nth-child(2) .service-button:hover {
+            box-shadow: 0 15px 40px rgba(245, 87, 108, 0.5);
+        }
+
+        .button-arrow {
+            transition: transform 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .service-button:hover .button-arrow {
+            transform: translateX(5px);
+        }
+
+        .service-stats {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            background: rgba(10, 10, 15, 0.5);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .footer-link:hover {
+            color: var(--accent-purple);
+        }
+
+        .footer-divider {
+            width: 100px;
+            height: 2px;
+            background: var(--primary-gradient);
+            margin: 0 auto;
+        }
+
+        .footer-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .footer-text strong {
+            background: var(--primary-gradient);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .services {
+                grid-template-columns: 1fr;
+                max-width: 600px;
+            }
+
+            .header {
+                padding: 1.5rem 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .service-card {
+                padding: 2rem;
+                border-radius: 20px;
+            }
+
+            .service-title {
+                font-size: 1.5rem;
+            }
+
+            .service-icon-wrapper {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+
+            .header {
+                padding: 1rem 1.5rem;
+            }
+
+            .logo {
+                font-size: 1.4rem;
+            }
+
+            .service-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .services {
+                grid-template-columns: 1fr;
+                min-width: auto;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas Background -->
+    <canvas id="canvas-bg"></canvas>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-container">
+                <div class="logo">Becelytica</div>
+            </div>
+            <nav class="nav-links">
+                <a href="#" class="nav-link">Plataforma</a>
+                <a href="#" class="nav-link">Soluciones</a>
+                <a href="#" class="nav-link">Contacto</a>
+            </nav>
+        </header>
+
+        <!-- Main Hero Section -->
+        <main class="main">
+            <div class="hero-badge">
+                <span class="badge-dot"></span>
+                Plataforma de Análisis Predictivo
+            </div>
+
+            <h1 class="hero-title">
+                Transformando datos en<br>
+                <span class="gradient-text">decisiones inteligentes</span>
+            </h1>
+
+            <p class="hero-subtitle">
+                Descubre nuestra suite completa de herramientas de análisis empresarial
+                potenciadas por inteligencia artificial de última generación.
+            </p>
+
+            <div class="services">
+                <!-- Suite de Análisis Predictivo Card -->
+                <div class="service-card">
+                    <div class="card-header">
+                        <div class="service-icon-wrapper">📊</div>
+                        <div class="card-badge">Predictivo</div>
+                    </div>
+
+                    <div class="card-content">
+                        <h3 class="service-title">Suite de Análisis Predictivo</h3>
+                        <p class="service-description">
+                            Plataforma avanzada de análisis de datos que combina machine learning y modelos estadísticos
+                            para transformar información histórica en proyecciones precisas y decisiones estratégicas.
+                        </p>
+
+                        <div class="service-features">
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span>Modelos predictivos de alta precisión</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span>Análisis de tendencias y patrones</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span>Visualización interactiva de datos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="service-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">99.9%</span>
+                                <span class="stat-label">Uptime</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">ML</span>
+                                <span class="stat-label">Powered</span>
+                            </div>
+                        </div>
+                        <a href="https://suite.becelytica.com" class="service-button">
+                            <span>Acceder</span>
+                            <span class="button-arrow">→</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- veAIx Analyzer Card -->
+                <div class="service-card">
+                    <div class="card-header">
+                        <div class="service-icon-wrapper">🎬</div>
+                        <div class="card-badge">IA Avanzada</div>
+                    </div>
+
+                    <div class="card-content">
+                        <h3 class="service-title">veAIx Analyzer</h3>
+                        <p class="service-description">
+                            Motor de análisis de video potenciado por IA que extrae insights profundos,
+                            detecta patrones visuales y transforma contenido audiovisual en inteligencia accionable.
+                        </p>
+
+                        <div class="service-features">
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span>Reconocimiento de objetos y escenas</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span>Análisis de sentimiento visual</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✓</span>
+                                <span>Transcripción y análisis de audio</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="service-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">95%</span>
+                                <span class="stat-label">Precisión</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">4K</span>
+                                <span class="stat-label">Calidad</span>
+                            </div>
+                        </div>
+                        <a href="#" class="service-button" id="veaixButton">
+                            <span>Próximamente</span>
+                            <span class="button-arrow">→</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Documentación</a>
+                    <a href="#" class="footer-link">API</a>
+                    <a href="#" class="footer-link">Términos de Servicio</a>
+                    <a href="#" class="footer-link">Privacidad</a>
+                    <a href="#" class="footer-link">Contacto</a>
+                </div>
+                <div class="footer-divider"></div>
+                <p class="footer-text">
+                    &copy; 2025 <strong>Becelytica</strong>. Innovación en análisis inteligente.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ==========================================
+        // Advanced Canvas Background Animation
+        // ==========================================
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+
+        let particles = [];
+        let connections = [];
+        let mouse = { x: null, y: null, radius: 150 };
+
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Particle class
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 2 + 1;
+                this.opacity = Math.random() * 0.5 + 0.2;
+                this.hue = Math.random() * 60 + 220; // Blue to purple range
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Boundary check
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+                // Mouse interaction
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < mouse.radius) {
+                    const force = (mouse.radius - distance) / mouse.radius;
+                    const angle = Math.atan2(dy, dx);
+                    this.vx -= Math.cos(angle) * force * 0.2;
+                    this.vy -= Math.sin(angle) * force * 0.2;
+                }
+
+                // Friction
+                this.vx *= 0.99;
+                this.vy *= 0.99;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${this.hue}, 70%, 60%, ${this.opacity})`;
+                ctx.fill();
+
+                // Glow effect
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = `hsla(${this.hue}, 70%, 60%, ${this.opacity})`;
+            }
+        }
+
+        // Initialize particles
+        function initParticles() {
+            particles = [];
+            const particleCount = Math.floor((canvas.width * canvas.height) / 15000);
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        initParticles();
+
+        // Connect particles
+        function connectParticles() {
+            const maxDistance = 150;
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < maxDistance) {
+                        const opacity = (1 - distance / maxDistance) * 0.3;
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(102, 126, 234, ${opacity})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw gradient background
+            const gradient = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, 0,
+                canvas.width / 2, canvas.height / 2, canvas.width / 2
+            );
+            gradient.addColorStop(0, 'rgba(102, 126, 234, 0.05)');
+            gradient.addColorStop(1, 'rgba(10, 10, 15, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Update and draw particles
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            connectParticles();
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Mouse move event
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        window.addEventListener('mouseout', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        // ==========================================
+        // Navigation Functions
+        // ==========================================
+        function navigateToVeAI() {
+            // Custom notification instead of alert
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(10, 10, 15, 0.95);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(245, 87, 108, 0.3);
+                border-radius: 20px;
+                padding: 2rem 3rem;
+                z-index: 10000;
+                text-align: center;
+                box-shadow: 0 20px 60px rgba(245, 87, 108, 0.3);
+                animation: fadeInScale 0.3s ease-out;
+            `;
+
+            notification.innerHTML = `
+                <h3 style="color: #f5576c; font-size: 1.5rem; margin-bottom: 1rem; font-weight: 700;">
+                    🎬 veAIx Analyzer
+                </h3>
+                <p style="color: #a8b2d1; font-size: 1rem; margin-bottom: 1.5rem;">
+                    Próximamente disponible. ¡Estamos trabajando en algo increíble!
+                </p>
+                <button onclick="this.parentElement.remove()" style="
+                    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                    color: white;
+                    border: none;
+                    padding: 0.8rem 2rem;
+                    border-radius: 50px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: transform 0.3s ease;
+                ">
+                    Entendido
+                </button>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Add animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInScale {
+                    from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Set up event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // veAIx button handler
+            const veaixButton = document.getElementById('veaixButton');
+            veaixButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                navigateToVeAI();
+            });
+
+            // Smooth scroll for nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                });
+            });
+
+            // Card click handlers
+            const cards = document.querySelectorAll('.service-card');
+            cards.forEach((card, index) => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.zIndex = '100';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.zIndex = '1';
+                });
+            });
+
+            // Parallax effect on scroll
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const parallaxElements = document.querySelectorAll('.service-card');
+
+                parallaxElements.forEach((el, index) => {
+                    const speed = 0.5 + (index * 0.1);
+                    el.style.transform = `translateY(${scrolled * speed * 0.1}px)`;
+                });
+            });
+        });
+
+        // Performance optimization: Reduce particles on mobile
+        if (window.innerWidth < 768) {
+            particles = particles.slice(0, particles.length / 2);
+        }
+    </script>
+</body>
+</html>
